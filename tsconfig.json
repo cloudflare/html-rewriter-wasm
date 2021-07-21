@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2018",
+    "lib": ["es2018"],
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "types": ["node"],
+    "sourceMap": true
+  }
+}

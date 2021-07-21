@@ -2,21 +2,19 @@ export interface ContentTypeOptions {
   html?: boolean;
 }
 
-// TODO: test chaining apis
-
 export class Element {
-  before(content: string, options?: ContentTypeOptions): Element;
-  after(content: string, options?: ContentTypeOptions): Element;
-  replace(content: string, options?: ContentTypeOptions): Element;
-  remove(): Element;
+  before(content: string, options?: ContentTypeOptions): this;
+  after(content: string, options?: ContentTypeOptions): this;
+  replace(content: string, options?: ContentTypeOptions): this;
+  remove(): this;
   getAttribute(name: string): string | null;
   hasAttribute(name: string): boolean;
-  setAttribute(name: string, value: string): Element;
-  removeAttribute(name: string): Element;
-  prepend(content: string, options?: ContentTypeOptions): Element;
-  append(content: string, options?: ContentTypeOptions): Element;
-  setInnerContent(content: string, options?: ContentTypeOptions): Element;
-  removeAndKeepContent(): Element;
+  setAttribute(name: string, value: string): this;
+  removeAttribute(name: string): this;
+  prepend(content: string, options?: ContentTypeOptions): this;
+  append(content: string, options?: ContentTypeOptions): this;
+  setInnerContent(content: string, options?: ContentTypeOptions): this;
+  removeAndKeepContent(): this;
   readonly attributes: [string, string][];
   readonly namespaceURI: string;
   readonly removed: boolean;
@@ -24,26 +22,25 @@ export class Element {
 }
 
 export class Comment {
-  before(content: string, options?: ContentTypeOptions): Comment;
-  after(content: string, options?: ContentTypeOptions): Comment;
-  replace(content: string, options?: ContentTypeOptions): Comment;
-  remove(): Comment;
+  before(content: string, options?: ContentTypeOptions): this;
+  after(content: string, options?: ContentTypeOptions): this;
+  replace(content: string, options?: ContentTypeOptions): this;
+  remove(): this;
   readonly removed: boolean;
   text: string;
 }
 
 export class TextChunk {
-  before(content: string, options?: ContentTypeOptions): TextChunk;
-  after(content: string, options?: ContentTypeOptions): TextChunk;
-  replace(content: string, options?: ContentTypeOptions): TextChunk;
-  remove(): TextChunk;
+  before(content: string, options?: ContentTypeOptions): this;
+  after(content: string, options?: ContentTypeOptions): this;
+  replace(content: string, options?: ContentTypeOptions): this;
+  remove(): this;
   readonly lastInTextNode: boolean;
   readonly removed: boolean;
   readonly text: string;
 }
 
 export class Doctype {
-  // TODO: test these return null if not defined
   readonly name: string | null;
   readonly publicId: string | null;
   readonly systemId: string | null;
@@ -68,8 +65,9 @@ export interface DocumentHandlers {
 
 export class HTMLRewriter {
   constructor(outputSink: (chunk: Uint8Array) => void);
-  on(selector: string, handlers: ElementHandlers): HTMLRewriter;
-  onDocument(handlers: DocumentHandlers): HTMLRewriter;
+  on(selector: string, handlers: ElementHandlers): this;
+  onDocument(handlers: DocumentHandlers): this;
   write(chunk: Uint8Array): Promise<void>;
   end(): Promise<void>;
+  free(): void;
 }
