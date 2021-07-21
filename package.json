@@ -2,8 +2,13 @@
   "name": "html-rewriter-wasm",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/html_rewriter.js",
+  "types": "dist/html_rewriter.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "./build.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -11,10 +16,13 @@
     "url": "git+https://github.com/mrbbot/html-rewriter-wasm.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "MrBBot",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/mrbbot/html-rewriter-wasm/issues"
   },
-  "homepage": "https://github.com/mrbbot/html-rewriter-wasm#readme"
+  "homepage": "https://github.com/mrbbot/html-rewriter-wasm#readme",
+  "devDependencies": {
+    "prettier": "^2.3.2"
+  }
 }

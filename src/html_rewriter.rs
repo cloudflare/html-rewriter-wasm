@@ -1,4 +1,6 @@
-use super::handlers::{DocumentContentHandlers, ElementContentHandlers, HandlerJsErrorWrap};
+use super::handlers::{
+    DocumentContentHandlers, ElementContentHandlers, HandlerJsErrorWrap, IntoNativeHandlers,
+};
 use super::*;
 use js_sys::{Function as JsFunction, Uint8Array};
 use lol_html::errors::RewritingError;
@@ -45,6 +47,7 @@ pub struct HTMLRewriter {
     output_sink: Option<JsOutputSink>,
     inner: Option<NativeHTMLRewriter<'static, JsOutputSink>>,
     inner_constructed: bool,
+    asyncify_stack: Vec<u8>,
 }
 
 #[wasm_bindgen]
@@ -53,6 +56,7 @@ impl HTMLRewriter {
     pub fn new(output_sink: &JsFunction) -> Self {
         HTMLRewriter {
             output_sink: Some(JsOutputSink::new(output_sink)),
+            asyncify_stack: vec![0; 1024],
             ..Self::default()
         }
     }
@@ -99,7 +103,9 @@ impl HTMLRewriter {
         let selector = selector.parse::<Selector>().into_js_result()?;
 
         self.selectors.push(selector);
-        self.element_content_handlers.push(handlers.into_native());
+        let stack_ptr = self.asyncify_stack_ptr();
+        self.element_content_handlers
+            .push(handlers.into_native(stack_ptr));
 
         Ok(())
     }
@@ -107,7 +113,9 @@ impl HTMLRewriter {
     #[wasm_bindgen(method, js_name=onDocument)]
     pub fn on_document(&mut self, handlers: DocumentContentHandlers) -> JsResult<()> {
         self.assert_not_fully_constructed()?;
-        self.document_content_handlers.push(handlers.into_native());
+        let stack_ptr = self.asyncify_stack_ptr();
+        self.document_content_handlers
+            .push(handlers.into_native(stack_ptr));
 
         Ok(())
     }
@@ -126,5 +134,10 @@ impl HTMLRewriter {
             .unwrap()
             .end()
             .map_err(rewriting_error_to_js)
+    }
+
+    #[wasm_bindgen(method, getter=asyncifyStackPtr)]
+    pub fn asyncify_stack_ptr(&mut self) -> *mut u8 {
+        self.asyncify_stack.as_mut_ptr()
     }
 }
