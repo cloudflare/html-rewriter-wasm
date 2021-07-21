@@ -112,13 +112,21 @@ and output to strings.
 ## Building
 
 You can build the package by running `npm run build`. You must do this prior to
-running tests with `npm test`. You **must** have mrbbot's fork of wasm-pack
-installed. This upgrades binaryen (wasm-opt) to version_92 which exports
-`asyncify_get_state`.
+running tests with `npm test`.
+
+You **must** have mrbbot's fork of wasm-pack installed. This upgrades binaryen
+(wasm-opt) to version_92 which exports `asyncify_get_state`:
+
+```shell
+$ cargo install --git https://github.com/mrbbot/wasm-pack
+$ npm run build
+$ npm test
+```
 
 ## License
 
-`html-rewriter-wasm` uses `lol-html` which is BSD 3-Clause licensed:
+`html-rewriter-wasm` uses [lol-html](https://github.com/cloudflare/lol-html/)
+which is BSD 3-Clause licensed:
 
 ```
 Copyright (C) 2019, Cloudflare, Inc.
