@@ -1,22 +1,6 @@
 use super::*;
-use lol_html::html_content::{Attribute as NativeAttribute, Element as NativeElement};
-use serde::Serialize;
+use lol_html::html_content::Element as NativeElement;
 use serde_wasm_bindgen::to_value as to_js_value;
-
-#[derive(Serialize)]
-pub struct Attribute {
-    pub name: String,
-    pub value: String,
-}
-
-impl From<&NativeAttribute<'_>> for Attribute {
-    fn from(native: &NativeAttribute) -> Self {
-        Attribute {
-            name: native.name(),
-            value: native.value(),
-        }
-    }
-}
 
 #[wasm_bindgen]
 pub struct Element(NativeRefWrap<NativeElement<'static, 'static>>);
@@ -48,15 +32,19 @@ impl Element {
             .map(|e| {
                 e.attributes()
                     .iter()
-                    .map(Attribute::from)
+                    .map(|a| vec![a.name(), a.value()])
                     .collect::<Vec<_>>()
             })
             .and_then(|a| to_js_value(&a).into_js_result())
     }
 
     #[wasm_bindgen(method, js_name=getAttribute)]
-    pub fn get_attribute(&self, name: &str) -> JsResult<Option<String>> {
-        self.0.get().map(|e| e.get_attribute(name))
+    pub fn get_attribute(&self, name: &str) -> JsResult<JsValue> {
+        self.0.get().map(|e| {
+            e.get_attribute(name)
+                .map(JsValue::from)
+                .unwrap_or(JsValue::null())
+        })
     }
 
     #[wasm_bindgen(method, js_name=hasAttribute)]

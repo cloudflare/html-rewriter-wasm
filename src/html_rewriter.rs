@@ -7,6 +7,7 @@ use lol_html::{
     ElementContentHandlers as NativeElementContentHandlers, HtmlRewriter as NativeHTMLRewriter,
     OutputSink, Selector, Settings,
 };
+use std::borrow::Cow;
 
 struct JsOutputSink(JsFunction);
 
@@ -27,6 +28,7 @@ impl OutputSink for JsOutputSink {
     }
 }
 
+//noinspection RsTypeCheck
 fn rewriting_error_to_js(err: RewritingError) -> JsValue {
     match err {
         RewritingError::ContentHandlerError(err) => err.downcast::<HandlerJsErrorWrap>().unwrap().0,
@@ -41,23 +43,22 @@ pub struct HTMLRewriter {
     element_content_handlers: Vec<NativeElementContentHandlers<'static>>,
     document_content_handlers: Vec<NativeDocumentContentHandlers<'static>>,
     output_sink: Option<JsOutputSink>,
-    encoding: String,
     inner: Option<NativeHTMLRewriter<'static, JsOutputSink>>,
+    inner_constructed: bool,
 }
 
 #[wasm_bindgen]
 impl HTMLRewriter {
     #[wasm_bindgen(constructor)]
-    pub fn new(encoding: String, output_sink: &JsFunction) -> Self {
+    pub fn new(output_sink: &JsFunction) -> Self {
         HTMLRewriter {
             output_sink: Some(JsOutputSink::new(output_sink)),
-            encoding,
             ..Self::default()
         }
     }
 
     fn assert_not_fully_constructed(&self) -> JsResult<()> {
-        if self.inner.is_some() {
+        if self.inner_constructed {
             Err("Handlers can't be added after write.".into())
         } else {
             Ok(())
@@ -69,28 +70,23 @@ impl HTMLRewriter {
             Some(ref mut inner) => inner,
             None => {
                 let output_sink = self.output_sink.take().unwrap();
-                // NOTE: selector are passed by reference to the rewriter ctor, though they
-                // are not stored in the rewriter, so we need their references to be valid
-                // only during the rewriter invocation.
-                let selectors: Vec<_> = self.selectors.drain(..).collect();
 
                 let settings = Settings {
                     element_content_handlers: self
-                        .element_content_handlers
+                        .selectors
                         .drain(..)
-                        .enumerate()
-                        .map(|(i, h)| (&selectors[i], h))
+                        .zip(self.element_content_handlers.drain(..))
+                        .map(|(selector, h)| (Cow::Owned(selector), h))
                         .collect(),
 
                     document_content_handlers: self.document_content_handlers.drain(..).collect(),
-                    encoding: &self.encoding,
                     ..Settings::default()
                 };
 
-                let rewriter =
-                    NativeHTMLRewriter::try_new(settings, output_sink).into_js_result()?;
+                let rewriter = NativeHTMLRewriter::new(settings, output_sink);
 
                 self.inner = Some(rewriter);
+                self.inner_constructed = true;
 
                 self.inner.as_mut().unwrap()
             }
@@ -123,6 +119,12 @@ impl HTMLRewriter {
     }
 
     pub fn end(&mut self) -> JsResult<()> {
-        self.inner_mut()?.end().map_err(rewriting_error_to_js)
+        self.inner_mut()?;
+        // Rewriter must be constructed by self.inner_mut()
+        self.inner
+            .take()
+            .unwrap()
+            .end()
+            .map_err(rewriting_error_to_js)
     }
 }
