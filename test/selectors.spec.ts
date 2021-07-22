@@ -13,8 +13,7 @@ const selectorMacro: Macro<
     .transform(input);
   t.is(res, expected);
 };
-selectorMacro.title = (providedTitle) =>
-  `testhandles ${providedTitle} selector`;
+selectorMacro.title = (providedTitle) => `handles ${providedTitle} selector`;
 
 test("*", selectorMacro, "*", "<h1>1</h1><p>2</p>", "<h1>new</h1><p>new</p>");
 test("E", selectorMacro, "p", "<h1>1</h1><p>2</p>", "<h1>1</h1><p>new</p>");
