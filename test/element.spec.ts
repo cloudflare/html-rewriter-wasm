@@ -19,15 +19,21 @@ const elementMutationsExpected = {
 };
 
 test("handles element properties", async (t) => {
-  t.plan(5);
+  t.plan(6);
   const res = await new HTMLRewriter()
     .on("p", {
       element(element) {
         t.is(element.tagName, "p");
         element.tagName = "h1";
-        t.deepEqual([...element.attributes], [["class", "red"]]);
         t.false(element.removed);
         t.is(element.namespaceURI, "http://www.w3.org/1999/xhtml");
+
+        // Check element.attributes is an IterableIterator
+        t.deepEqual(element.attributes.next(), {
+          value: ["class", "red"],
+          done: false,
+        });
+        t.deepEqual([...element.attributes], [["class", "red"]]);
       },
     })
     .transform('<p class="red">test</p>');

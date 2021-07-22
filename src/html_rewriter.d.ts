@@ -15,7 +15,7 @@ export class Element {
   append(content: string, options?: ContentTypeOptions): this;
   setInnerContent(content: string, options?: ContentTypeOptions): this;
   removeAndKeepContent(): this;
-  readonly attributes: [string, string][];
+  readonly attributes: IterableIterator<[string, string]>;
   readonly namespaceURI: string;
   readonly removed: boolean;
   tagName: string;
@@ -47,7 +47,7 @@ export class Doctype {
 }
 
 export class DocumentEnd {
-  append(content: string, options?: ContentTypeOptions): DocumentEnd;
+  append(content: string, options?: ContentTypeOptions): this;
 }
 
 export interface ElementHandlers {

@@ -16,6 +16,7 @@ wasm-pack build --target nodejs
 
 echo "---> Patching JavaScript glue code..."
 # Wraps write/end with asyncify magic and adds this returns for chaining
+# diff -uN pkg/html_rewriter.js pkg2/html_rewriter.js > html_rewriter.js.patch
 patch -uN pkg/html_rewriter.js < html_rewriter.js.patch
 
 echo "---> Copying required files to dist..."
