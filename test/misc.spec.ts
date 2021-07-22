@@ -79,7 +79,18 @@ test("rethrows error thrown in handler", async (t) => {
   await t.throwsAsync(promise, { message: "Whoops!" });
 });
 
-test("handles concurrent rewriters with async handlers", async (t) => {
+test("rethrows error thrown in async handler", async (t) => {
+  const rewriter = new RawHTMLRewriter(() => {}).on("p", {
+    async element() {
+      throw new Error("Whoops!");
+    },
+  });
+
+  const promise = rewriter.write(new TextEncoder().encode("<p>test</p>"));
+  await t.throwsAsync(promise, { message: "Whoops!" });
+});
+
+test.serial("handles concurrent rewriters with async handlers", async (t) => {
   // Note this test requires the "safe" HTMLRewriter, see comments in
   // src/modules/rewriter.ts for more details
   const rewriter = (i: number) =>
@@ -101,6 +112,24 @@ test("handles concurrent rewriters with async handlers", async (t) => {
   const res4 = rewriter(4);
   const texts = await Promise.all([res3, res4]);
   t.deepEqual(texts, ["<p>new 3</p>", "<p>new 4</p>"]);
+});
+
+test.serial("handles many async handlers for single chunk write", async (t) => {
+  const rewriter = new HTMLRewriter();
+  rewriter.on("h1", {
+    async element(element) {
+      await wait(50);
+      element.setInnerContent("new h1");
+    },
+  });
+  rewriter.on("p", {
+    async element(element) {
+      await wait(50);
+      element.setInnerContent("new p");
+    },
+  });
+  const res = await rewriter.transform("<h1>old h1</h1><p>old p</p>");
+  t.is(res, "<h1>new h1</h1><p>new p</p>");
 });
 
 test("rewriter allows chaining", (t) => {

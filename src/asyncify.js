@@ -92,7 +92,6 @@ async function wrap(rewriter, fn, ...args) {
   assertNoneState();
   let result = fn(...args);
 
-  // TODO: add test for this, if write triggers multiple async handlers?
   while (wasm.asyncify_get_state() === State.UNWINDING) {
     wasm.asyncify_stop_unwind();
 
