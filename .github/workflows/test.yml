@@ -18,6 +18,8 @@ jobs:
           profile: minimal
           toolchain: stable
       - uses: Swatinem/rust-cache@v1
+        with:
+          cache-on-failure: true
       - name: Use Node.js LTS
         uses: actions/setup-node@v2
         with:

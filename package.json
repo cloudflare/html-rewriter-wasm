@@ -16,7 +16,14 @@
     "type": "git",
     "url": "git+https://github.com/mrbbot/html-rewriter-wasm.git"
   },
-  "keywords": ["cloudflare", "workers", "worker", "html", "rewriter", "lol"],
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "worker",
+    "html",
+    "rewriter",
+    "lol"
+  ],
   "author": "MrBBot",
   "license": "BSD-3-Clause",
   "bugs": {
@@ -24,6 +31,7 @@
   },
   "homepage": "https://github.com/mrbbot/html-rewriter-wasm#readme",
   "devDependencies": {
+    "@types/node": "^14.17.5",
     "ava": "^3.15.0",
     "prettier": "^2.3.2",
     "ts-node": "^10.1.0",

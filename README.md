@@ -10,6 +10,12 @@ their work on
 [lol-html's JavaScript API](https://github.com/cloudflare/lol-html/tree/master/js-api)
 which this package's Rust code is based on.
 
+## Features
+
+- 🔋 Supports all handler types, properties and methods
+- ⏰ Supports synchronous and asynchronous handlers
+- 📌 Supports class handlers with correctly bound methods
+
 ## Usage
 
 ```js
@@ -43,6 +49,25 @@ implementation that doesn't have the caveats listed below, but restricts input
 and output to strings.
 
 ## Caveats
+
+- Once `write` or `end` has been called, you cannot add any more handlers. You
+  must register all handlers before you start transforming:
+
+  ```js
+  const rewriter = new HTMLRewriter(...);
+
+  // ❌
+  rewriter.on("h1", { ... });
+  await rewriter.write(encoder.encode("<h1>1</h1"));
+  rewriter.on("p", { ... }); // not allowed
+  await rewriter.write(encoder.encode("<p>2</p>"));
+
+  // ✅
+  rewriter.on("h1", { ... });
+  rewriter.on("p", { ... });
+  await rewriter.write(encoder.encode("<h1>1</h1"));
+  await rewriter.write(encoder.encode("<p>2</p>"));
+  ```
 
 - `end` may only be called once per `HTMLRewriter` instance. This means you must
   create a new `HTMLRewriter` instance for each transformation:
@@ -85,6 +110,19 @@ and output to strings.
   await rewriter.write(encoder.encode("<p>1</p>"));
   await rewriter.write(encoder.encode("<p>2</p>"));
   ```
+
+## Internals
+
+`lol-html` doesn't natively support asynchronous handlers. Instead, whenever a
+handler returns a `Promise`, we have to unwind the WebAssembly stack into
+temporary storage, wait for the promise to resolve, then rewind the stack and
+continue parsing. This temporary storage is per `HTMLRewriter` instance, hence
+we cannot have concurrent `write` and `end` calls. We use the
+[Asyncify](https://github.com/WebAssembly/binaryen/blob/main/src/passes/Asyncify.cpp)
+feature of [Binaryen](https://github.com/WebAssembly/binaryen) to implement
+this. See
+[this article](https://kripken.github.io/blog/wasm/2019/07/16/asyncify.html) for
+more details.
 
 ## Building
 
