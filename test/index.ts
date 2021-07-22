@@ -17,24 +17,12 @@ export class HTMLRewriter {
   private documentHandlers: DocumentHandlers[] = [];
 
   on(selector: string, handlers: ElementHandlers): this {
-    this.elementHandlers.push([
-      selector,
-      {
-        element: handlers.element?.bind(handlers),
-        comments: handlers.comments?.bind(handlers),
-        text: handlers.text?.bind(handlers),
-      },
-    ]);
+    this.elementHandlers.push([selector, handlers]);
     return this;
   }
 
   onDocument(handlers: DocumentHandlers): this {
-    this.documentHandlers.push({
-      doctype: handlers.doctype?.bind(handlers),
-      comments: handlers.comments?.bind(handlers),
-      text: handlers.text?.bind(handlers),
-      end: handlers.end?.bind(handlers),
-    });
+    this.documentHandlers.push(handlers);
     return this;
   }
 
@@ -42,7 +30,6 @@ export class HTMLRewriter {
     let output = "";
     const rewriter = new RawHTMLRewriter((chunk) => {
       output += decoder.decode(chunk);
-      if (chunk.length === 0) queueMicrotask(() => rewriter.free());
     });
     for (const [selector, handlers] of this.elementHandlers) {
       rewriter.on(selector, handlers);
@@ -50,9 +37,13 @@ export class HTMLRewriter {
     for (const handlers of this.documentHandlers) {
       rewriter.onDocument(handlers);
     }
-    await rewriter.write(encoder.encode(input));
-    await rewriter.end();
-    return output;
+    try {
+      await rewriter.write(encoder.encode(input));
+      await rewriter.end();
+      return output;
+    } finally {
+      rewriter.free();
+    }
   }
 }
 

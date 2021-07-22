@@ -10,6 +10,7 @@ use lol_html::{
     ElementContentHandlers as NativeElementContentHandlers,
 };
 use std::mem;
+use std::rc::Rc;
 use thiserror::Error;
 use wasm_bindgen::JsCast;
 
@@ -29,13 +30,12 @@ extern "C" {
 }
 
 macro_rules! make_handler {
-    ($handler:ident, $JsArgType:ident, $stack_ptr:ident) => {
+    ($handler:ident, $JsArgType:ident, $this:ident, $stack_ptr:ident) => {
         move |arg: &mut _| {
             let (js_arg, anchor) = $JsArgType::from_native(arg);
-            let this = JsValue::NULL;
             let js_arg = JsValue::from(js_arg);
 
-            let res = match $handler.call1(&this, &js_arg) {
+            let res = match $handler.call1(&$this, &js_arg) {
                 Ok(res) => {
                     if let Some(promise) = res.dyn_ref::<JsPromise>() {
                         await_promise($stack_ptr, promise);
@@ -72,18 +72,22 @@ extern "C" {
 
 impl IntoNativeHandlers<NativeElementContentHandlers<'static>> for ElementContentHandlers {
     fn into_native(self, stack_ptr: *mut u8) -> NativeElementContentHandlers<'static> {
+        let handlers: Rc<JsValue> = Rc::new((&self).into());
         let mut native = NativeElementContentHandlers::default();
 
         if let Some(handler) = self.element() {
-            native = native.element(make_handler!(handler, Element, stack_ptr));
+            let this = handlers.clone();
+            native = native.element(make_handler!(handler, Element, this, stack_ptr));
         }
 
         if let Some(handler) = self.comments() {
-            native = native.comments(make_handler!(handler, Comment, stack_ptr));
+            let this = handlers.clone();
+            native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
         }
 
         if let Some(handler) = self.text() {
-            native = native.text(make_handler!(handler, TextChunk, stack_ptr));
+            let this = handlers.clone();
+            native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
         }
 
         native
@@ -109,22 +113,27 @@ extern "C" {
 
 impl IntoNativeHandlers<NativeDocumentContentHandlers<'static>> for DocumentContentHandlers {
     fn into_native(self, stack_ptr: *mut u8) -> NativeDocumentContentHandlers<'static> {
+        let handlers: Rc<JsValue> = Rc::new((&self).into());
         let mut native = NativeDocumentContentHandlers::default();
 
         if let Some(handler) = self.doctype() {
-            native = native.doctype(make_handler!(handler, Doctype, stack_ptr));
+            let this = handlers.clone();
+            native = native.doctype(make_handler!(handler, Doctype, this, stack_ptr));
         }
 
         if let Some(handler) = self.comments() {
-            native = native.comments(make_handler!(handler, Comment, stack_ptr));
+            let this = handlers.clone();
+            native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
         }
 
         if let Some(handler) = self.text() {
-            native = native.text(make_handler!(handler, TextChunk, stack_ptr));
+            let this = handlers.clone();
+            native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
         }
 
         if let Some(handler) = self.end() {
-            native = native.end(make_handler!(handler, DocumentEnd, stack_ptr));
+            let this = handlers.clone();
+            native = native.end(make_handler!(handler, DocumentEnd, this, stack_ptr));
         }
 
         native

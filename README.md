@@ -18,13 +18,9 @@ import { HTMLRewriter } from "html-rewriter-wasm";
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+let output = "";
 const rewriter = new HTMLRewriter((outputChunk) => {
-  if (outputChunk.length === 0) {
-    // Remember to free memory on last chunk
-    queueMicrotask(() => rewriter.free());
-  } else {
-    console.log(decoder.decode(outputChunk)); // <p>new</p>
-  }
+  output += decoder.decode(outputChunk);
 });
 
 rewriter.on("p", {
@@ -33,8 +29,13 @@ rewriter.on("p", {
   },
 });
 
-await rewriter.write(encoder.encode("<p>old</p>"));
-await rewriter.end();
+try {
+  await rewriter.write(encoder.encode("<p>old</p>"));
+  await rewriter.end();
+  console.log(output); // <p>new</p>
+} finally {
+  rewriter.free(); // Remember to free memory
+}
 ```
 
 See [test/index.ts](./test/index.ts) for a more traditional `HTMLRewriter`
@@ -83,30 +84,6 @@ and output to strings.
   // ✅
   await rewriter.write(encoder.encode("<p>1</p>"));
   await rewriter.write(encoder.encode("<p>2</p>"));
-  ```
-
-- If using handler classes, you must bind their methods to the class first:
-
-  ```js
-  class Handler {
-    constructor(value) {
-      this.value = value;
-    }
-
-    element(element) {
-      element.setInnerContent(this.value);
-    }
-  }
-  const rewriter = new HTMLRewriter(...);
-  const handler = new Handler("new");
-
-  // ❌
-  rewriter.on("p", handler);
-
-  // ✅
-  rewriter.on("p", {
-    element: handler.element.bind(handler)
-  })
   ```
 
 ## Building
