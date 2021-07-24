@@ -1,5 +1,5 @@
---- pkg/html_rewriter.js	2021-07-22 16:09:24.000000000 +0100
-+++ pkg2/html_rewriter.js	2021-07-22 16:10:13.000000000 +0100
+--- pkg/html_rewriter.js	2021-07-24 10:12:13.000000000 +0100
++++ pkg2/html_rewriter.js	2021-07-24 10:11:57.000000000 +0100
 @@ -1,7 +1,7 @@
  let imports = {};
  imports['__wbindgen_placeholder__'] = module.exports;
@@ -194,7 +194,17 @@
      }
      /**
      * @returns {boolean}
-@@ -847,5 +868,6 @@
+@@ -801,7 +822,8 @@
+ }, arguments) };
+ 
+ module.exports.__wbg_instanceof_Promise_c6535fc791fcc4d2 = function(arg0) {
+-    var ret = getObject(arg0) instanceof Promise;
++    var obj = getObject(arg0);
++    var ret = (obj instanceof Promise) || (typeof obj === "object" && typeof obj.then === "function");
+     return ret;
+ };
+ 
+@@ -847,5 +869,6 @@
  const wasmModule = new WebAssembly.Module(bytes);
  const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
  wasm = wasmInstance.exports;
