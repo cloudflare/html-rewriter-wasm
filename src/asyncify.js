@@ -95,6 +95,7 @@ async function wrap(rewriter, fn, ...args) {
   while (wasm.asyncify_get_state() === State.UNWINDING) {
     wasm.asyncify_stop_unwind();
 
+    assertNoneState();
     assert(promises.has(stackPtr));
     await promises.get(stackPtr);
     promises.delete(stackPtr);
