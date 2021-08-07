@@ -200,7 +200,7 @@
  module.exports.__wbg_instanceof_Promise_c6535fc791fcc4d2 = function(arg0) {
 -    var ret = getObject(arg0) instanceof Promise;
 +    var obj = getObject(arg0);
-+    var ret = (obj instanceof Promise) || (typeof obj === "object" && typeof obj.then === "function");
++    var ret = (obj instanceof Promise) || (Object.prototype.toString.call(obj) === '[object Promise]');
      return ret;
  };
  

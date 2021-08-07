@@ -1,4 +1,5 @@
 import { TextEncoder, TextDecoder } from "util";
+import vm from "vm";
 import test from "ava";
 import { HTMLRewriter as RawHTMLRewriter } from "..";
 import { HTMLRewriter, wait } from ".";
@@ -136,4 +137,19 @@ test("rewriter allows chaining", (t) => {
   const rewriter = new RawHTMLRewriter(() => {});
   t.is(rewriter.on("p", {}), rewriter);
   t.is(rewriter.onDocument({}), rewriter);
+});
+
+test.serial("handles async handler in different realm", async (t) => {
+  const context = vm.createContext({HTMLRewriter, wait});
+  const res = await vm.runInContext(`
+  const rewriter = new HTMLRewriter();
+  rewriter.on("p", {
+    async element(element) {
+      await wait(50);
+      element.setInnerContent("new");
+    },
+  });
+  rewriter.transform("<p>old</p>");
+  `, context);
+  t.is(res, "<p>new</p>");
 });
