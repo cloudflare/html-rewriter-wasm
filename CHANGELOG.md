@@ -1,5 +1,9 @@
 # 🚧 Changelog
 
+## 0.3.3
+
+- Make `Promise` detection for async handlers stricter
+
 ## 0.3.2
 
 - Fix `Promise` detection for async handlers. `Promise`s in different realms
