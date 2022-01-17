@@ -63,8 +63,12 @@ export interface DocumentHandlers {
   end?(end: DocumentEnd): void | Promise<void>;
 }
 
+export interface HTMLRewriterOptions {
+  enableEsiTags?: boolean;
+}
+
 export class HTMLRewriter {
-  constructor(outputSink: (chunk: Uint8Array) => void);
+  constructor(outputSink: (chunk: Uint8Array) => void, options?: HTMLRewriterOptions);
   on(selector: string, handlers: ElementHandlers): this;
   onDocument(handlers: DocumentHandlers): this;
   write(chunk: Uint8Array): Promise<void>;

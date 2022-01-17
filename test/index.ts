@@ -6,6 +6,7 @@ import {
   Element,
   ElementHandlers,
   HTMLRewriter as RawHTMLRewriter,
+  HTMLRewriterOptions as RawHTMLRewriterOptions,
   TextChunk,
 } from "..";
 
@@ -15,6 +16,8 @@ const decoder = new TextDecoder();
 export class HTMLRewriter {
   private elementHandlers: [selector: string, handlers: ElementHandlers][] = [];
   private documentHandlers: DocumentHandlers[] = [];
+
+  constructor(private readonly options?: RawHTMLRewriterOptions) {}
 
   on(selector: string, handlers: ElementHandlers): this {
     this.elementHandlers.push([selector, handlers]);
@@ -30,7 +33,7 @@ export class HTMLRewriter {
     let output = "";
     const rewriter = new RawHTMLRewriter((chunk) => {
       output += decoder.decode(chunk);
-    });
+    }, this.options);
     for (const [selector, handlers] of this.elementHandlers) {
       rewriter.on(selector, handlers);
     }

@@ -48,15 +48,25 @@ pub struct HTMLRewriter {
     inner: Option<NativeHTMLRewriter<'static, JsOutputSink>>,
     inner_constructed: bool,
     asyncify_stack: Vec<u8>,
+    enable_esi_tags: bool,
+}
+
+#[wasm_bindgen]
+extern "C" {
+    pub type HTMLRewriterOptions;
+
+    #[wasm_bindgen(structural, method, getter, js_name = enableEsiTags)]
+    pub fn enable_esi_tags(this: &HTMLRewriterOptions) -> Option<bool>;
 }
 
 #[wasm_bindgen]
 impl HTMLRewriter {
     #[wasm_bindgen(constructor)]
-    pub fn new(output_sink: &JsFunction) -> Self {
+    pub fn new(output_sink: &JsFunction, options: Option<HTMLRewriterOptions>) -> Self {
         HTMLRewriter {
             output_sink: Some(JsOutputSink::new(output_sink)),
             asyncify_stack: vec![0; 1024],
+            enable_esi_tags: options.and_then(|o| o.enable_esi_tags()).unwrap_or(false),
             ..Self::default()
         }
     }
@@ -84,6 +94,7 @@ impl HTMLRewriter {
                         .collect(),
 
                     document_content_handlers: self.document_content_handlers.drain(..).collect(),
+                    enable_esi_tags: self.enable_esi_tags,
                     ..Settings::default()
                 };
 

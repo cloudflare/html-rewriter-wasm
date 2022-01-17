@@ -1,7 +1,7 @@
 import { TextEncoder, TextDecoder } from "util";
 import vm from "vm";
 import test from "ava";
-import { HTMLRewriter as RawHTMLRewriter } from "..";
+import { HTMLRewriter as RawHTMLRewriter, ElementHandlers } from "..";
 import { HTMLRewriter, wait } from ".";
 
 test("handles multiple element handlers", async (t) => {
@@ -140,8 +140,9 @@ test("rewriter allows chaining", (t) => {
 });
 
 test.serial("handles async handler in different realm", async (t) => {
-  const context = vm.createContext({HTMLRewriter, wait});
-  const res = await vm.runInContext(`
+  const context = vm.createContext({ HTMLRewriter, wait });
+  const res = await vm.runInContext(
+    `
   const rewriter = new HTMLRewriter();
   rewriter.on("p", {
     async element(element) {
@@ -150,6 +151,30 @@ test.serial("handles async handler in different realm", async (t) => {
     },
   });
   rewriter.transform("<p>old</p>");
-  `, context);
+  `,
+    context
+  );
   t.is(res, "<p>new</p>");
+});
+
+test("treats esi tags as void tags if option enabled", async (t) => {
+  const handlers: ElementHandlers = {
+    element(element) {
+      element.replace("replacement");
+    },
+  };
+
+  const input = '<span><esi:include src="a" /> text<span>';
+
+  // Check with option disabled
+  let res = await new HTMLRewriter()
+    .on("esi\\:include", handlers)
+    .transform(input);
+  t.is(res, "<span>replacement");
+
+  // Check with option enabled
+  res = await new HTMLRewriter({ enableEsiTags: true })
+    .on("esi\\:include", handlers)
+    .transform(input);
+  t.is(res, "<span>replacement text<span>");
 });
