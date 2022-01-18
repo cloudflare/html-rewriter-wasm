@@ -48,6 +48,16 @@ See [test/index.ts](./test/index.ts) for a more traditional `HTMLRewriter`
 implementation that doesn't have the caveats listed below, but restricts input
 and output to strings.
 
+To enable the
+[`html_rewriter_treats_esi_include_as_void_tag`](https://developers.cloudflare.com/workers/platform/compatibility-dates#htmlrewriter-handling-of-esiinclude)
+compatibility flag, set `enableEsiTags` when constructing the `HTMLRewriter`:
+
+```js
+const rewriter = new HTMLRewriter((outputChunk) => { ... }, {
+  enableEsiTags: true,
+});
+```
+
 ## Caveats
 
 - Once `write` or `end` has been called, you cannot add any more handlers. You
