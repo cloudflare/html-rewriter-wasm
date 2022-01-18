@@ -1,3 +1,4 @@
+use js_sys::TypeError;
 use lol_html::html_content::ContentType as NativeContentType;
 use std::cell::Cell;
 use std::convert::Into;
@@ -57,7 +58,9 @@ impl<R> NativeRefWrap<R> {
 
     fn assert_not_poisoned(&self) -> JsResult<()> {
         if self.poisoned.get() {
-            Err("The object has been freed and can't be used anymore.".into())
+            Err(TypeError::new(
+                "This content token is no longer valid. Content tokens are only valid during the execution of the relevant content handler.",
+            ).into())
         } else {
             Ok(())
         }
