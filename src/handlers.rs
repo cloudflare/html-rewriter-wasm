@@ -77,17 +77,17 @@ impl IntoNativeHandlers<NativeElementContentHandlers<'static>> for ElementConten
         let mut native = NativeElementContentHandlers::default();
 
         if let Some(handler) = self.element() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.element(make_handler!(handler, Element, this, stack_ptr));
         }
 
         if let Some(handler) = self.comments() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
         }
 
         if let Some(handler) = self.text() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
         }
 
@@ -118,22 +118,22 @@ impl IntoNativeHandlers<NativeDocumentContentHandlers<'static>> for DocumentCont
         let mut native = NativeDocumentContentHandlers::default();
 
         if let Some(handler) = self.doctype() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.doctype(make_handler!(handler, Doctype, this, stack_ptr));
         }
 
         if let Some(handler) = self.comments() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
         }
 
         if let Some(handler) = self.text() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
         }
 
         if let Some(handler) = self.end() {
-            let this = handlers.clone();
+            let this = Rc::clone(&handlers);
             native = native.end(make_handler!(handler, DocumentEnd, this, stack_ptr));
         }
 
