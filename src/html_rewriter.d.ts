@@ -19,6 +19,14 @@ export class Element {
   readonly namespaceURI: string;
   readonly removed: boolean;
   tagName: string;
+  onEndTag(handler: (this: this, endTag: EndTag) => void | Promise<void>): void;
+}
+
+export class EndTag {
+  before(content: string, options?: ContentTypeOptions): this;
+  after(content: string, options?: ContentTypeOptions): this;
+  remove(): this;
+  name: string;
 }
 
 export class Comment {
@@ -68,7 +76,10 @@ export interface HTMLRewriterOptions {
 }
 
 export class HTMLRewriter {
-  constructor(outputSink: (chunk: Uint8Array) => void, options?: HTMLRewriterOptions);
+  constructor(
+    outputSink: (chunk: Uint8Array) => void,
+    options?: HTMLRewriterOptions
+  );
   on(selector: string, handlers: ElementHandlers): this;
   onDocument(handlers: DocumentHandlers): this;
   write(chunk: Uint8Array): Promise<void>;

@@ -26,13 +26,13 @@ unsafe impl Sync for HandlerJsErrorWrap {}
 #[wasm_bindgen(raw_module = "./asyncify.js")]
 extern "C" {
     #[wasm_bindgen(js_name = awaitPromise)]
-    fn await_promise(stack_ptr: *mut u8, promise: &JsPromise);
+    pub(crate) fn await_promise(stack_ptr: *mut u8, promise: &JsPromise);
 }
 
 macro_rules! make_handler {
     ($handler:ident, $JsArgType:ident, $this:ident, $stack_ptr:ident) => {
         move |arg: &mut _| {
-            let (js_arg, anchor) = $JsArgType::from_native(arg);
+            let (js_arg, anchor) = $JsArgType::from_native(arg, $stack_ptr);
             let js_arg = JsValue::from(js_arg);
 
             let res = match $handler.call1(&$this, &js_arg) {
@@ -51,6 +51,7 @@ macro_rules! make_handler {
         }
     };
 }
+pub(crate) use make_handler;
 
 pub trait IntoNativeHandlers<T> {
     fn into_native(self, stack_ptr: *mut u8) -> T;

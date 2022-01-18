@@ -1,6 +1,10 @@
+use super::end_tag::EndTag;
+use super::handlers::{await_promise, make_handler, HandlerJsErrorWrap};
 use super::*;
+use js_sys::{Function as JsFunction, Promise as JsPromise};
 use lol_html::html_content::Element as NativeElement;
 use serde_wasm_bindgen::to_value as to_js_value;
+use wasm_bindgen::JsCast;
 
 #[wasm_bindgen]
 pub struct Element(NativeRefWrap<NativeElement<'static, 'static>>);
@@ -99,5 +103,15 @@ impl Element {
     #[wasm_bindgen(method, js_name=removeAndKeepContent)]
     pub fn remove_and_keep_content(&mut self) -> Result<(), JsValue> {
         self.0.get_mut().map(|e| e.remove_and_keep_content())
+    }
+
+    #[wasm_bindgen(method, js_name=onEndTag)]
+    pub fn on_end_tag(&mut self, handler: JsFunction) -> Result<(), JsValue> {
+        let this = JsValue::NULL;
+        let stack_ptr = self.0.stack_ptr;
+        self.0
+            .get_mut()?
+            .on_end_tag(make_handler!(handler, EndTag, this, stack_ptr))
+            .into_js_result()
     }
 }

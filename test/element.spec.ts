@@ -134,7 +134,7 @@ test("element allows chaining", async (t) => {
     })
     .transform("<p>test</p>");
 });
-test("handles element async handler", async (t) => {
+test.serial("handles element async handler", async (t) => {
   const res = await new HTMLRewriter()
     .on("p", {
       async element(element) {
@@ -157,4 +157,103 @@ test("handles element class handler", async (t) => {
     .on("p", new Handler("new"))
     .transform("<p>test</p>");
   t.is(res, "<p>new</p>");
+});
+
+test("handles end tag properties", async (t) => {
+  const res = await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        element.onEndTag(function (end) {
+          t.is(this, element);
+          t.is(end.name, "p");
+          end.name = "h1";
+        });
+      },
+    })
+    .transform("<p>test</p>");
+  t.is(res, "<p>test</h1>");
+});
+test("handles end tag mutations", async (t) => {
+  const input = "<p>test</p>";
+  const beforeAfterExpected = [
+    "<p>",
+    "test",
+    "&lt;span&gt;before&lt;/span&gt;",
+    "<span>before html</span>",
+    "</p>",
+    "<span>after html</span>",
+    "&lt;span&gt;after&lt;/span&gt;",
+  ].join("");
+  const removeExpected = "<p>test";
+
+  // before/after
+  let res = await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        const that = this;
+        element.onEndTag((end) => {
+          t.is(this, that);
+          end.before("<span>before</span>");
+          end.before("<span>before html</span>", { html: true });
+          end.after("<span>after</span>");
+          end.after("<span>after html</span>", { html: true });
+        });
+      },
+    })
+    .transform(input);
+  t.is(res, beforeAfterExpected);
+
+  // remove
+  res = await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        element.onEndTag((end) => {
+          end.remove();
+        });
+      },
+    })
+    .transform(input);
+  t.is(res, removeExpected);
+});
+test("end tag allows chaining", async (t) => {
+  t.plan(3);
+  await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        element.onEndTag((end) => {
+          t.is(end.before(""), end);
+          t.is(end.after(""), end);
+          t.is(end.remove(), end);
+        });
+      },
+    })
+    .transform("<p>test</p>");
+});
+test.serial("handles end tag async handler", async (t) => {
+  const res = await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        element.onEndTag(async (end) => {
+          await wait(50);
+          end.before("!");
+        });
+      },
+    })
+    .transform("<p>test</p>");
+  t.is(res, "<p>test!</p>");
+});
+test("uses last end tag handler", async (t) => {
+  const res = await new HTMLRewriter()
+    .on("p", {
+      element(element) {
+        element.onEndTag((end) => {
+          end.before("1");
+        });
+        element.onEndTag((end) => {
+          end.before("2");
+        });
+      },
+    })
+    .transform("<p>test</p>");
+  t.is(res, "<p>test2</p>");
 });
