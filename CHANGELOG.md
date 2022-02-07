@@ -1,5 +1,9 @@
 # 🚧 Changelog
 
+## 0.4.1
+
+- Throw `TypeError`s instead of `string`s on parser errors
+
 ## 0.4.0
 
 - Add support for `Element#onEndTag`
