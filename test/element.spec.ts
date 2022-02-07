@@ -257,3 +257,16 @@ test("uses last end tag handler", async (t) => {
     .transform("<p>test</p>");
   t.is(res, "<p>test2</p>");
 });
+test("throws error on no end tag", async (t) => {
+  const res = new HTMLRewriter()
+    .on("img", {
+      element(element) {
+        element.onEndTag(() => t.fail());
+      },
+    })
+    .transform('<img src="" alt="">');
+  await t.throwsAsync(res, {
+    instanceOf: TypeError,
+    message: "Parser error: No end tag.",
+  });
+});

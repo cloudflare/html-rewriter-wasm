@@ -86,7 +86,11 @@ trait IntoJsResult<T> {
 impl<T, E: ToString> IntoJsResult<T> for Result<T, E> {
     #[inline]
     fn into_js_result(self) -> JsResult<T> {
-        self.map_err(|e| JsValue::from(e.to_string()))
+        self.map_err(|e| {
+            let mut msg = String::from("Parser error: ");
+            msg.push_str(&e.to_string());
+            TypeError::new(&msg).into()
+        })
     }
 }
 

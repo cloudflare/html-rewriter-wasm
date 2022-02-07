@@ -153,10 +153,9 @@ test("throws error on unsupported selector", async (t) => {
       },
     })
     .transform("<p>old</p>");
-  // Cannot use t.throwsAsync here as promise rejects with string not error type
-  try {
-    await res;
-  } catch (e) {
-    t.is(e, "Unsupported pseudo-class or pseudo-element in selector.");
-  }
+  await t.throwsAsync(res, {
+    instanceOf: TypeError,
+    message:
+      "Parser error: Unsupported pseudo-class or pseudo-element in selector.",
+  });
 });
