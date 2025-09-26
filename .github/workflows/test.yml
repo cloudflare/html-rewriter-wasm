@@ -12,11 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Use Rust stable
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
       - uses: Swatinem/rust-cache@v1
         with:
           cache-on-failure: true
@@ -24,8 +19,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: lts/*
-      - name: Install wasm-pack
-        run: cargo install --git https://github.com/mrbbot/wasm-pack
+      - name: Install wasm-bindgen-cli
+        run: cargo +1.82.0 install wasm-bindgen-cli@0.2.74
+      - name: Install wasm-opt
+        run: |
+          wget https://github.com/WebAssembly/binaryen/releases/download/version_118/binaryen-version_118-x86_64-linux.tar.gz
+          tar -xzf binaryen-version_118-x86_64-linux.tar.gz
+          sudo cp binaryen-version_118/bin/wasm-opt /usr/local/bin/
       - run: npm ci
       - run: npm run build
       - run: npm test

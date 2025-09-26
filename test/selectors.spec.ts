@@ -1,12 +1,13 @@
 import test, { Macro } from "ava";
 import { HTMLRewriter } from ".";
+import type { Element } from "../dist/html_rewriter";
 
 const selectorMacro: Macro<
   [selector: string, input: string, expected: string]
 > = async (t, selector, input, expected) => {
   const res = await new HTMLRewriter()
     .on(selector, {
-      element(element) {
+      element(element: Element) {
         element.setInnerContent("new");
       },
     })

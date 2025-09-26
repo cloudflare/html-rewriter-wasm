@@ -1,14 +1,16 @@
 import { TextEncoder, TextDecoder } from "util";
 import { Macro } from "ava";
-import {
+import type {
   Comment,
   DocumentHandlers,
   Element,
   ElementHandlers,
-  HTMLRewriter as RawHTMLRewriter,
   HTMLRewriterOptions as RawHTMLRewriterOptions,
   TextChunk,
-} from "..";
+} from "../dist/html_rewriter";
+import {
+  HTMLRewriter as RawHTMLRewriter,
+} from "../dist/html_rewriter";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -31,7 +33,7 @@ export class HTMLRewriter {
 
   async transform(input: string): Promise<string> {
     let output = "";
-    const rewriter = new RawHTMLRewriter((chunk) => {
+    const rewriter = new RawHTMLRewriter((chunk: Uint8Array) => {
       output += decoder.decode(chunk);
     }, this.options);
     for (const [selector, handlers] of this.elementHandlers) {

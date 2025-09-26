@@ -1,5 +1,5 @@
 import test from "ava";
-import { Element } from "..";
+import type { Element } from "../dist/html_rewriter";
 import { HTMLRewriter, mutationsMacro, wait } from ".";
 
 const elementMutationsInput = "<p>test</p>";

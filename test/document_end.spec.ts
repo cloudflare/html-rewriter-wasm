@@ -1,5 +1,5 @@
 import test from "ava";
-import { DocumentEnd } from "..";
+import type { DocumentEnd } from "../dist/html_rewriter";
 import { HTMLRewriter, wait } from ".";
 
 test("handles document end specific mutations", async (t) => {

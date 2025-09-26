@@ -1,8 +1,9 @@
 import { TextEncoder, TextDecoder } from "util";
 import vm from "vm";
 import test from "ava";
-import { HTMLRewriter as RawHTMLRewriter, ElementHandlers } from "..";
-import { HTMLRewriter, wait } from ".";
+import { HTMLRewriter as RawHTMLRewriter } from "../dist/html_rewriter";
+import type { ElementHandlers, Element, TextChunk } from '../dist/html_rewriter';
+import { HTMLRewriter, wait } from "./index";
 
 test("handles multiple element handlers", async (t) => {
   const res = await new HTMLRewriter()
@@ -31,14 +32,14 @@ test("handles streaming", async (t) => {
 
   const outputChunks: string[] = [];
   const decoder = new TextDecoder();
-  const rewriter = new RawHTMLRewriter((chunk) =>
+  const rewriter = new RawHTMLRewriter((chunk: Uint8Array) =>
     outputChunks.push(decoder.decode(chunk))
   ).on("p", {
-    text(text) {
+    text(text: TextChunk) {
       t.is(text.text, expectedTextChunks.shift());
       t.is(text.lastInTextNode, text.text === "");
     },
-  });
+  }) as unknown as RawHTMLRewriter;
 
   const inputChunks = [
     '<html lang="en">',
@@ -74,7 +75,7 @@ test("rethrows error thrown in handler", async (t) => {
     element() {
       throw new Error("Whoops!");
     },
-  });
+  }) as unknown as RawHTMLRewriter;
 
   const promise = rewriter.write(new TextEncoder().encode("<p>test</p>"));
   await t.throwsAsync(promise, { message: "Whoops!" });
@@ -85,13 +86,13 @@ test("rethrows error thrown in async handler", async (t) => {
     async element() {
       throw new Error("Whoops!");
     },
-  });
+  }) as unknown as RawHTMLRewriter;
 
   const promise = rewriter.write(new TextEncoder().encode("<p>test</p>"));
   await t.throwsAsync(promise, { message: "Whoops!" });
 });
 
-test.serial("handles concurrent rewriters with async handlers", async (t) => {
+test("handles concurrent rewriters with async handlers", async (t) => {
   // Note this test requires the "safe" HTMLRewriter, see comments in
   // src/modules/rewriter.ts for more details
   const rewriter = (i: number) =>
@@ -159,7 +160,7 @@ test.serial("handles async handler in different realm", async (t) => {
 
 test("treats esi tags as void tags if option enabled", async (t) => {
   const handlers: ElementHandlers = {
-    element(element) {
+    element(element: Element) {
       element.replace("replacement");
     },
   };

@@ -1,5 +1,5 @@
 import test, { Macro } from "ava";
-import { Comment } from "..";
+import { Comment } from "../dist/html_rewriter";
 import { HTMLRewriter, mutationsMacro, wait } from ".";
 
 const commentsMutationsInput = "<p><!--test--></p>";
@@ -55,7 +55,8 @@ test("comment allows chaining", async (t) => {
 const commentAsyncHandlerMacro: Macro<
   [(rw: HTMLRewriter, comments: (c: Comment) => Promise<void>) => HTMLRewriter]
 > = async (t, func) => {
-  const res = await func(new HTMLRewriter(), async (comment) => {
+  const rewriter = new HTMLRewriter();
+  const res = await func(rewriter, async (comment) => {
     await wait(50);
     comment.text = "new";
   }).transform("<p><!--test--></p>");

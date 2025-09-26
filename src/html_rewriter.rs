@@ -121,7 +121,7 @@ impl HTMLRewriter {
         Ok(())
     }
 
-    #[wasm_bindgen(method, js_name=onDocument)]
+    #[wasm_bindgen(js_name=onDocument)]
     pub fn on_document(&mut self, handlers: DocumentContentHandlers) -> JsResult<()> {
         self.assert_not_fully_constructed()?;
         let stack_ptr = self.asyncify_stack_ptr();
@@ -147,7 +147,7 @@ impl HTMLRewriter {
             .map_err(rewriting_error_to_js)
     }
 
-    #[wasm_bindgen(method, getter=asyncifyStackPtr)]
+    #[wasm_bindgen(getter=asyncifyStackPtr)]
     pub fn asyncify_stack_ptr(&mut self) -> *mut u8 {
         self.asyncify_stack.as_mut_ptr()
     }

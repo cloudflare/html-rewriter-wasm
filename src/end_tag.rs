@@ -8,12 +8,12 @@ impl_from_native!(NativeEndTag --> EndTag);
 
 #[wasm_bindgen]
 impl EndTag {
-    #[wasm_bindgen(method, getter=name)]
+    #[wasm_bindgen(getter=name)]
     pub fn name(&self) -> JsResult<String> {
         self.0.get().map(|e| e.name())
     }
 
-    #[wasm_bindgen(method, setter=name)]
+    #[wasm_bindgen(setter=name)]
     pub fn set_name(&mut self, name: &str) -> JsResult<()> {
         self.0.get_mut().map(|e| e.set_name_str(String::from(name)))
     }

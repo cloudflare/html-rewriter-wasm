@@ -1,5 +1,5 @@
 import test from "ava";
-import { Doctype } from "..";
+import type { Doctype } from "../dist/html_rewriter";
 import { HTMLRewriter, wait } from ".";
 
 const doctypeInput =
@@ -8,7 +8,7 @@ test("handles document doctype properties", async (t) => {
   t.plan(4);
   const res = await new HTMLRewriter()
     .onDocument({
-      doctype(doctype) {
+      doctype(doctype: Doctype) {
         t.is(doctype.name, "html");
         t.is(doctype.publicId, "-//W3C//DTD HTML 4.01//EN");
         t.is(doctype.systemId, "http://www.w3.org/TR/html4/strict.dtd");
@@ -21,7 +21,7 @@ test("handles document doctype properties for empty doctype", async (t) => {
   t.plan(3);
   await new HTMLRewriter()
     .onDocument({
-      doctype(doctype) {
+      doctype(doctype: Doctype) {
         t.is(doctype.name, null);
         t.is(doctype.publicId, null);
         t.is(doctype.systemId, null);
@@ -32,7 +32,7 @@ test("handles document doctype properties for empty doctype", async (t) => {
 test("handles document doctype async handler", async (t) => {
   const res = await new HTMLRewriter()
     .onDocument({
-      async doctype(doctype) {
+      async doctype(doctype: Doctype) {
         await wait(50);
         t.is(doctype.name, "html");
       },
