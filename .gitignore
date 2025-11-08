@@ -1,5 +1,8 @@
 .DS_Store
 .idea
-dist
 node_modules
 target
+node
+pkg
+play.mjs
+npm

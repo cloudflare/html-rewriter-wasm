@@ -44,7 +44,7 @@ struct NativeRefWrap<R> {
 }
 
 impl<R> NativeRefWrap<R> {
-    pub fn wrap<I>(inner: &mut I, stack_ptr: *mut u8) -> (Self, Anchor) {
+    pub fn wrap<I>(inner: &mut I, stack_ptr: *mut u8) -> (Self, Anchor<'_>) {
         let wrap = NativeRefWrap {
             inner_ptr: unsafe { mem::transmute(inner) },
             poisoned: Rc::new(Cell::new(false)),
@@ -157,7 +157,7 @@ macro_rules! impl_mutations {
                 self.0.get_mut().map(|o| o.remove())
             }
 
-            #[wasm_bindgen(method, getter)]
+            #[wasm_bindgen(getter)]
             pub fn removed(&self) -> JsResult<bool> {
                 self.0.get().map(|o| o.removed())
             }

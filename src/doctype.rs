@@ -8,21 +8,21 @@ impl_from_native!(NativeDoctype --> Doctype);
 
 #[wasm_bindgen]
 impl Doctype {
-    #[wasm_bindgen(method, getter)]
+    #[wasm_bindgen(getter)]
     pub fn name(&self) -> JsResult<JsValue> {
         self.0
             .get()
             .map(|d| d.name().map(JsValue::from).unwrap_or(JsValue::null()))
     }
 
-    #[wasm_bindgen(method, getter=publicId)]
+    #[wasm_bindgen(getter=publicId)]
     pub fn public_id(&self) -> JsResult<JsValue> {
         self.0
             .get()
             .map(|d| d.public_id().map(JsValue::from).unwrap_or(JsValue::null()))
     }
 
-    #[wasm_bindgen(method, getter=systemId)]
+    #[wasm_bindgen(getter=systemId)]
     pub fn system_id(&self) -> JsResult<JsValue> {
         self.0
             .get()

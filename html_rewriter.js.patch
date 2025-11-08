@@ -1,14 +1,10 @@
 --- pkg/html_rewriter.js	2022-01-18 17:37:39.000000000 +0000
 +++ pkg2/html_rewriter.js	2022-01-18 17:37:19.000000000 +0000
-@@ -1,7 +1,7 @@
- let imports = {};
- imports['__wbindgen_placeholder__'] = module.exports;
- let wasm;
--const { awaitPromise } = require(String.raw`./asyncify.js`);
-+const { awaitPromise, setWasmExports, wrap } = require(String.raw`./asyncify.js`);
- const { TextDecoder, TextEncoder } = require(String.raw`util`);
+@@ -1,3 +1,3 @@
+-import { awaitPromise } from './asyncify.js';
++import { awaitPromise, setWasmExports, wrap } from './asyncify.js';
  
- const heap = new Array(32).fill(undefined);
+ let wasm;
 @@ -233,6 +233,7 @@
          var ptr0 = passStringToWasm0(content, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
          var len0 = WASM_VECTOR_LEN;
@@ -118,7 +114,7 @@
      }
      /**
      * @param {string} content
-@@ -530,17 +543,19 @@
+@@ -525,17 +538,19 @@
          var ptr0 = passStringToWasm0(content, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
          var len0 = WASM_VECTOR_LEN;
          wasm.element_setInnerContent(this.ptr, ptr0, len0, isLikeNone(content_type) ? 0 : addHeapObject(content_type));
@@ -131,7 +127,7 @@
 +        return this;
      }
      /**
-     * @param {any} handler
+     * @param {Function} handler
      */
      onEndTag(handler) {
 -        wasm.element_onEndTag(this.ptr, addHeapObject(handler));
@@ -223,20 +219,17 @@
      }
      /**
      * @returns {boolean}
-@@ -893,7 +917,8 @@
- };
- 
- module.exports.__wbg_instanceof_Promise_c6535fc791fcc4d2 = function(arg0) {
--    var ret = getObject(arg0) instanceof Promise;
-+    var obj = getObject(arg0);
-+    var ret = (obj instanceof Promise) || (Object.prototype.toString.call(obj) === '[object Promise]');
-     return ret;
- };
- 
-@@ -939,5 +964,6 @@
- const wasmModule = new WebAssembly.Module(bytes);
- const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
- wasm = wasmInstance.exports;
-+setWasmExports(wasm);
- module.exports.__wasm = wasm;
- 
+@@ -899,5 +922,6 @@
+     };
+     imports.wbg.__wbg_instanceof_Promise_b2dc9a259c6bc079 = function(arg0) {
+-        var ret = getObject(arg0) instanceof Promise;
++        var obj = getObject(arg0);
++        var ret = (obj instanceof Promise) || (Object.prototype.toString.call(obj) === '[object Promise]');
+         return ret;
+     };
+@@ -941,4 +966,4 @@
+     wasm = instance.exports;
+     init.__wbindgen_wasm_module = module;
+-
++    setWasmExports(wasm);
+     return wasm;

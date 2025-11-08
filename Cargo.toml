@@ -6,16 +6,11 @@ edition = "2018"
 
 [dependencies]
 js-sys = "0.3.33"
-lol_html = { git = "https://github.com/cloudflare/lol-html", rev = "f32bd14" }
+lol_html = { git = "https://github.com/cloudflare/lol-html", rev = "810c0c0" }
 serde = { version = "1.0.104", features = ["derive"] }
 serde-wasm-bindgen = "0.1.3"
-wasm-bindgen = "0.2.74"
+wasm-bindgen = "=0.2.74"
 thiserror = "1.0.2"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-
-[package.metadata.wasm-pack.profile.dev]
-wasm-opt = ["--asyncify"]
-[package.metadata.wasm-pack.profile.release]
-wasm-opt = ["-Os", "--asyncify"]

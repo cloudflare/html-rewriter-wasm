@@ -6,7 +6,7 @@ use super::text_chunk::TextChunk;
 use super::*;
 use js_sys::{Function as JsFunction, Promise as JsPromise};
 use lol_html::{
-    DocumentContentHandlers as NativeDocumentContentHandlers,
+    html_content, DocumentContentHandlers as NativeDocumentContentHandlers,
     ElementContentHandlers as NativeElementContentHandlers,
 };
 use std::mem;
@@ -30,8 +30,8 @@ extern "C" {
 }
 
 macro_rules! make_handler {
-    ($handler:ident, $JsArgType:ident, $this:ident, $stack_ptr:ident) => {
-        move |arg: &mut _| {
+    ($handler:ident, $JsArgType:ident, $this:ident, $stack_ptr:ident, $arg_ty:ty) => {
+        move |arg: &mut $arg_ty| {
             let (js_arg, anchor) = $JsArgType::from_native(arg, $stack_ptr);
             let js_arg = JsValue::from(js_arg);
 
@@ -78,17 +78,35 @@ impl IntoNativeHandlers<NativeElementContentHandlers<'static>> for ElementConten
 
         if let Some(handler) = self.element() {
             let this = Rc::clone(&handlers);
-            native = native.element(make_handler!(handler, Element, this, stack_ptr));
+            native = native.element(make_handler!(
+                handler,
+                Element,
+                this,
+                stack_ptr,
+                html_content::Element
+            ));
         }
 
         if let Some(handler) = self.comments() {
             let this = Rc::clone(&handlers);
-            native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
+            native = native.comments(make_handler!(
+                handler,
+                Comment,
+                this,
+                stack_ptr,
+                html_content::Comment
+            ));
         }
 
         if let Some(handler) = self.text() {
             let this = Rc::clone(&handlers);
-            native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
+            native = native.text(make_handler!(
+                handler,
+                TextChunk,
+                this,
+                stack_ptr,
+                html_content::TextChunk
+            ));
         }
 
         native
@@ -119,22 +137,46 @@ impl IntoNativeHandlers<NativeDocumentContentHandlers<'static>> for DocumentCont
 
         if let Some(handler) = self.doctype() {
             let this = Rc::clone(&handlers);
-            native = native.doctype(make_handler!(handler, Doctype, this, stack_ptr));
+            native = native.doctype(make_handler!(
+                handler,
+                Doctype,
+                this,
+                stack_ptr,
+                html_content::Doctype
+            ));
         }
 
         if let Some(handler) = self.comments() {
             let this = Rc::clone(&handlers);
-            native = native.comments(make_handler!(handler, Comment, this, stack_ptr));
+            native = native.comments(make_handler!(
+                handler,
+                Comment,
+                this,
+                stack_ptr,
+                html_content::Comment
+            ));
         }
 
         if let Some(handler) = self.text() {
             let this = Rc::clone(&handlers);
-            native = native.text(make_handler!(handler, TextChunk, this, stack_ptr));
+            native = native.text(make_handler!(
+                handler,
+                TextChunk,
+                this,
+                stack_ptr,
+                html_content::TextChunk
+            ));
         }
 
         if let Some(handler) = self.end() {
             let this = Rc::clone(&handlers);
-            native = native.end(make_handler!(handler, DocumentEnd, this, stack_ptr));
+            native = native.end(make_handler!(
+                handler,
+                DocumentEnd,
+                this,
+                stack_ptr,
+                html_content::DocumentEnd
+            ));
         }
 
         native
