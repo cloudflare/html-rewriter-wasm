@@ -1,40 +1,68 @@
 {
-  "name": "html-rewriter-wasm",
-  "version": "0.4.1",
-  "description": "WebAssembly version of HTMLRewriter",
-  "main": "dist/html_rewriter.js",
-  "types": "dist/html_rewriter.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "prepublishOnly": "npm run build && npm test",
-    "build": "./build.sh",
-    "test": "ava"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mrbbot/html-rewriter-wasm.git"
-  },
-  "keywords": [
-    "cloudflare",
-    "workers",
-    "worker",
-    "html",
-    "rewriter",
-    "lol"
-  ],
-  "author": "MrBBot",
-  "license": "BSD-3-Clause",
-  "bugs": {
-    "url": "https://github.com/mrbbot/html-rewriter-wasm/issues"
-  },
-  "homepage": "https://github.com/mrbbot/html-rewriter-wasm#readme",
-  "devDependencies": {
-    "@types/node": "^14.17.5",
-    "ava": "^3.15.0",
-    "prettier": "^2.3.2",
-    "ts-node": "^10.1.0",
-    "typescript": "^4.3.5"
-  }
+    "name": "htmlrewriter",
+    "version": "0.0.13",
+    "description": "Use Cloudflare HTMLRewriter in Node.js, Browser, Next.js and more",
+    "type": "module",
+    "files": [
+        "dist",
+        "src",
+        "README.md",
+        "bun.js",
+        "vercel.js",
+        "browser.js",
+        "cloudflare.js",
+        "default.js",
+        "node.mjs"
+    ],
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "bun": "./bun.js",
+            "workerd": "./cloudflare.js",
+            "edge-light": "./vercel.js",
+            "node": "./node.mjs",
+            "browser": "./browser.js",
+            "default": "./default.js"
+        },
+        "./dist/html_rewriter_bg.wasm": "./dist/html_rewriter_bg.wasm",
+        "./dist/html_rewriter_wrapper.js": "./dist/html_rewriter_wrapper.js",
+        "./dist/html_rewriter.js": "./dist/html_rewriter.js",
+        "./package.json": "./package.json"
+    },
+    "scripts": {
+        "try": "bun scripts/try.js && node scripts/try.js && deno run --allow-read scripts/try.js && pnpm vite dev scripts",
+        "prepublishOnly": "# pnpm build",
+        "test": "pnpm vitest",
+        "build": "tsx scripts/build.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/remorses/htmlrewriter.git"
+    },
+    "keywords": [
+        "cloudflare",
+        "workers",
+        "vercel",
+        "worker",
+        "htmlrewriter",
+        "lol"
+    ],
+    "author": "Tommaso De Rossi, morse <beats.by.morse@gmail.com>",
+    "license": "BSD-3-Clause",
+    "bugs": {
+        "url": "https://github.com/remorses/htmlrewriter/issues"
+    },
+    "homepage": "https://github.com/remorses/htmlrewriter#readme",
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.1",
+        "@types/node": "^20.11.13",
+        "@xmorse/deployment-utils": "^0.2.19",
+        "fs-extra": "^11.1.1",
+        "htmlrewriter": "^0.0.12",
+        "prettier": "^2.3.2",
+        "tsx": "^4.20.2",
+        "typescript": "^5.8.3",
+        "vitest": "^3.1.1"
+    }
 }
